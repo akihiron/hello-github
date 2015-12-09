@@ -19,61 +19,83 @@ For i = 0 To objIE.document.all.Length - 1
        	objIE.document.all(i).checked	= true
        End If
     Next
+WScript.Sleep 300
+
 objIE.document.forms("csv-export-form").submit
-call "text"
+
+WScript.Sleep 10000
+
+
+Set wsh = WScript.CreateObject("WScript.Shell")
 
 
 
 
-'Option Explicit
 
-Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
-Private Declare Function FindWindowEx Lib "user32" Alias "FindWindowExA" (ByVal hWnd1 As Long, ByVal hWnd2 As Long, ByVal lpsz1 As String, ByVal lpsz2 As String) As Long
-Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hwnd As Long, ByVal wMsg As Long, ByVal wParam As Long, lParam As Any) As Long
-Private Declare Function GetDlgCtrlID Lib "user32" (ByVal hwnd As Long) As Long
 
-Private Const WM_COMMAND As Long = &H111
-Private Const CLASSNAME_ﾀﾞｲｱﾛｸﾞ As String = "#32770"
-Private Const CLASSNAME_ﾎﾞﾀﾝ   As String = "Button"
 
-Private Sub Test()
-  Const STEP1_TITLE  As String = "ﾌｧｲﾙﾉﾀﾞｳﾝﾛｰﾄﾞ"
-  Const STEP2_TITLE  As String = "名前ｦ付ｹﾃ保存"
+Sub FileDownLoad_Proc()
+Dim strCaption As String
+Dim PWnd As IntPtr
+Dim cWnd As IntPtr
 
-  Dim l_lngWnd_Window_Step1  As Long
-  Dim l_lngWnd_Window_Step2  As Long
-  
-  'step1
-  If Not FindDialog(STEP1_TITLE, l_lngWnd_Window_Step1) Then
-    Exit Sub
-  End If
-  Call PushSaveBtn(l_lngWnd_Window_Step1)
-  
-  
-  'step2
-  If Not FindDialog(STEP2_TITLE, l_lngWnd_Window_Step2) Then
-    Exit Sub
-  End If
-  Call PushSaveBtn(l_lngWnd_Window_Step2)
+' 親ウィンドウ取得
+strCaption = "○○○○ - Windows Internet Explorer"
+While PWnd = 0
+PWnd = FindWindowEx(0, 0, "IEFrame", strCaption)
+System.Threading.Thread.Sleep(50)
+End While
+
+' 通知バーのハンドル
+While cWnd = 0
+cWnd = FindWindowEx(PWnd, 0&, "Frame Notification Bar", vbNullString)
+System.Threading.Thread.Sleep(50)
+End While
+
+' 通知バーボタン群のハンドル
+Dim hChild As IntPtr = FindWindowEx(cWnd, 0&, "DirectUIHWND", vbNullString)
+Dim objAcc As IAccessible = Nothing
+
+AccessibleObjectFromWindow(hChild, OBJID_CLIENT, IID_IAccessible, objAcc)
+
+If Not IsNothing(objAcc) Then
+ClickPreserve(objAcc)
+While cWnd = 0
+cWnd = FindWindowEx(PWnd, 0&, "Frame Notification Bar", vbNullString)
+System.Threading.Thread.Sleep(50)
+End While
+SendMessage(cWnd, WM_QUIT, 0, 0&)
+
+End If
+
 End Sub
+Private Sub ClickPreserve(ByVal acc As IAccessible)
 
-'ﾀﾞｲｱﾛｸﾞｦ探ｽ
-Private Function FindDialog(ByVal p_strCaption As String, ByRef p_lngFindWnd As Long) As Boolean
-  p_lngFindWnd = 0
-  Do
-    DoEvents
-'    If Not IEｶﾞBUSY Then
-'      Exit Do
-'    End If
-    p_lngFindWnd = FindWindow(CLASSNAME_ﾀﾞｲｱﾛｸﾞ, p_strCaption)
-  Loop While p_lngFindWnd = 0
-  
-  FindDialog = p_lngFindWnd <> 0
-End Function
+Dim i As Long
+Dim count = acc.accChildCount
+Dim lst(count - 1) As Object
 
-'ﾎﾞﾀﾝｦ押ｽ
-Private Sub PushSaveBtn(ByVal p_lngWindowWnd As Long, Optional p_strBtnCaption As String = "保存(&S)")
-  Dim l_lngWnd_Save  As Long
-  l_lngWnd_Save = FindWindowEx(p_lngWindowWnd, 0, CLASSNAME_ﾎﾞﾀﾝ, p_strBtnCaption)
-  Call SendMessage(p_lngWindowWnd, WM_COMMAND, GetDlgCtrlID(l_lngWnd_Save), ByVal l_lngWnd_Save)
+If count > 0 Then
+AccessibleChildren(acc, 0, count, lst, 0)
+If Not IsNothing(lst) Then
+For i = LBound(lst) To UBound(lst)
+With lst(i)
+'On Error Resume Next
+'Debug.Print("ChildCount: " & .accChildCount)
+'Debug.Print("Value: " & .accValue(CHILDID_SELF))
+'Debug.Print("Name: " & .accName(CHILDID_SELF))
+'Debug.Print("Description: " & .accDescription(CHILDID_SELF))
+'On Error GoTo 0
+'保存ボタンを見つけたらクリック（デフォルトアクション）する
+If .accName(CHILDID_SELF) = "保存" Then
+
+System.Threading.Thread.Sleep(500)
+.accDoDefaultAction(CHILDID_SELF)
+System.Threading.Thread.Sleep(500)
+End If
+End With
+ClickPreserve(lst(i)) '再帰
+Next
+End If
+End If
 End Sub
