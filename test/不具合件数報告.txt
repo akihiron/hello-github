@@ -1,0 +1,165 @@
+Sub Filter()
+    Dim elements As String          'フィルターをかける文字
+    Dim FieldColumn1 As Integer      'フィールドの列を指定
+    Dim FieldColumn2 As Integer
+    Dim FieldColumn3 As Integer
+    Const FieldColumnName1 As String = "作成者"   '検索したいフィールドの名前
+    Const FieldColumnName2 As String = "作成日"
+    Const FieldColumnName3 As String = "外部ReportNo"
+    Dim colum As Integer
+    Dim row As Integer
+    Dim sheetname As String
+    Dim FailureNum As Integer
+    Dim FailureNumToday As Integer
+    Dim result As String
+    Dim fieldname As String
+    Const sheetNumber As Integer = 2 'シート数
+    
+    
+    
+    '不具合件数
+    
+    For sheetnum = 1 To sheetNumber
+        
+        row = 1 '行を入力
+        colum = 1  '列を入力
+        'sheetname = "0001"     'シート名を入力
+        
+           Sheets(sheetnum).Activate
+            Range("A1").AutoFilter
+        Do While True
+            If (Cells(row, colum).Value = FieldColumnName1) Then
+                FieldColumn1 = colum
+            End If
+            
+            If (Cells(row, colum).Value = FieldColumnName2) Then
+                FieldColumn2 = colum
+            End If
+            
+              If (Cells(row, colum).Value = FieldColumnName3) Then
+                FieldColumn3 = colum
+            End If
+            
+            If (colum > Cells(1, Columns.Count).End(xlToLeft).column) Then
+                Exit Do
+            End If
+            
+            colum = colum + 1
+        Loop
+        
+        'step1全体の不具合件数
+        'FieldColumn1 = 2    'testのため
+        Rows(1).AutoFilter Field:=FieldColumn1, Criteria1:="<>*伊藤*"
+          
+        If Cells(Rows.Count, 1).End(xlUp).row = 1 Then
+            FailureNum = 0
+        Else
+            FailureNum = Range(Range("A1"), Cells(Rows.Count, 1).End(xlUp)) _
+                    .SpecialCells(xlCellTypeVisible).Count - 1
+        End If
+        
+        
+        'step2今日日付のもの
+        'FieldColumn2 = 2    'testのため
+        Rows(1).AutoFilter Field:=FieldColumn2, Criteria1:=xlFilterToday _
+        , Operator:=xlFilterDynamic
+        
+        
+        If Cells(Rows.Count, 1).End(xlUp).row = 1 Then
+            FailureNumToday = 0
+        Else
+            FailureNumToday = Range(Range("A1"), Cells(Rows.Count, 1).End(xlUp)) _
+                    .SpecialCells(xlCellTypeVisible).Count - 1
+        End If
+        
+        'step3
+        Range("A1").AutoFilter  'filterのリセット
+        Rows(1).AutoFilter Field:=FieldColumn1, Criteria1:="<>*伊藤*"   '全体の件数
+        Dim pvc As PivotCache
+        Dim pvt As PivotTable
+        
+        
+        FieldColumn3 = 3    'testのため
+        Sheets(sheetnum).Select
+        fieldname = Sheets(1).Cells(1, FieldColumn3).Value
+        Sheets.Add after:=Worksheets(Worksheets.Count)
+        
+        
+        
+        'ActiveSheet.name = "集計"
+        'コレクションにピボットテーブルの新しいキャッシュを追加
+        'Set pvc = ActiveWorkbook.PivotCaches.Create( _
+        '          SourceType:=xlDatabase, _
+        '          SourceData:=Sheets(1).name & "!" & Cells(1, FieldColumn3).Address(ReferenceStyle:=xlR1C1) & ":" _
+        '    & Cells(FailureNum + 1, FieldColumn3).Address(ReferenceStyle:=xlR1C1), _
+        '          Version:=xlPivotTableVersion14)
+                  
+        ' ピボットテーブルの作成
+        'Set pvt = pvc.CreatePivotTable( _
+        '           TableDestination:=ActiveSheet.name & "!R3C1", _
+        '           TableName:="ﾋﾟﾎﾞｯﾄﾃｰﾌﾞﾙ1", _
+        '           DefaultVersion:=xlPivotTableVersion14)
+        
+        ' フィールドの選択
+        'With pvt.PivotFields(Sheets(1).Cells(1, FieldColumn3).Value)
+        '    .Orientation = xlRowField
+        '    .Position = 1
+        'End With
+        '  Set pvt = pvc.CreatePivotTable( _
+                   TableDestination:=ActiveSheet.name & "!R3C2", _
+                   TableName:="ﾋﾟﾎﾞｯﾄﾃｰﾌﾞﾙ2", _
+                   DefaultVersion:=xlPivotTableVersion14)
+        
+        ' データフィールドの選択
+        'pvt.AddDataField pvt.PivotFields(Sheets(1).Cells(1, FieldColumn3).Value), "合計 /不具合数", xlCount
+        
+    
+        
+        
+        
+        
+        '////////////////////////////////////////////////////////////
+        ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:= _
+            Sheets(sheetnum).name & "!" & Cells(1, FieldColumn3).Address(ReferenceStyle:=xlR1C1) & ":" _
+            & Cells(FailureNum + 1, FieldColumn3).Address(ReferenceStyle:=xlR1C1), Version:=xlPivotTableVersion14).CreatePivotTable _
+            TableDestination:=Range("A3"), TableName:="ﾋﾟﾎﾞｯﾄﾃｰﾌﾞﾙ2", DefaultVersion _
+            :=xlPivotTableVersion14
+        ActiveSheet.Select
+        Cells(3, 1).Select
+        ActiveWorkbook.ShowPivotTableFieldList = True
+        With ActiveSheet.PivotTables("ﾋﾟﾎﾞｯﾄﾃｰﾌﾞﾙ2").PivotFields(fieldname)
+            .Orientation = xlRowField
+            .Position = 1
+            
+        End With
+        'ActiveSheet.PivotTables("ﾋﾟﾎﾞｯﾄﾃｰﾌﾞﾙ2").AddDataField ActiveSheet.PivotTables( _
+                "ﾋﾟﾎﾞｯﾄﾃｰﾌﾞﾙ2").PivotFields(fieldname), "データの個数 / プロジェクト", xlCount
+        
+        'ActiveWorkbook.ShowPivotTableFieldList = False
+        
+        MsgBox Sheets(sheetnum).name & vbCrLf & FailureNum & vbCrLf & FailureNumToday
+    Next
+    fourth
+End Sub
+
+
+Sub fourth()
+    
+Dim name As String
+Dim timeNow As String
+Dim folderPath As String
+
+folderPath = "C:\"      '保存先のフォルダパス
+timeNow = Hour(time) & Minute(time)
+
+
+name = "不具合件数報告" & "_" & Date & ".xlsx"  'ファイル名
+name = Replace(name, "/", "")
+MsgBox name
+    
+ActiveWorkbook.SaveAs filename:=name, _
+                        FileFormat:=xlCSV, _
+                        ReadOnlyRecommended:=False
+
+
+End Sub
