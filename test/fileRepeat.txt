@@ -1,0 +1,89 @@
+
+'特定のシートまで繰り返し
+Sub repeatOfSpecialSheet()
+    Const sheetnameA As String = ""  '始まりのシート名
+    Const sheetnameB As String = ""  '終わりのシート名
+    Dim rangeStart As Integer
+    Dim rangeStop As Integer
+    
+    
+    For i = 1 To Worksheets.Count
+        
+        If (Sheets(i).name = sheetnameA) Then
+            rangeStart = i
+        ElseIf (Sheets(i).name = sheetnameB) Then
+            rangeStop = i
+        End If
+    
+    Next
+    
+    For i = rangeStart To rangeStop
+        '処理を書く
+        
+    Next
+End Sub
+
+'このフォルダがメインの処理
+
+'特定のファイルを繰り返し
+Sub repeatFile()
+    Dim fileNames() As String
+    fileNames() = displayDirectory  'file名すべてを取得
+        
+    For Each i In fileNames()
+        MsgBox i
+    Next
+    
+    repeatOfSpecialSheet
+    
+End Sub
+
+
+
+
+'特定のフォルダのファイル名取得
+Function displayDirectory() As String()
+    Const cnsTitle = "フォルダ内のファイル名一覧取得"
+    Const cnsDIR = "\*.xlsx" 'excelファイルの取得
+    Dim xlAPP As Application
+    'Dim strPathName As String,
+    Const strPathName As String = "C:\Users\Akihiro\Documents" 'フォルダ名を記載
+'    vntPathName As Variant
+    Dim strFileName As String
+    Dim strFileNames() As String
+    Dim GYO As Long
+
+    Set xlAPP = Application
+    ' InputBoxでフォルダ指定を受ける
+    'vntPathName = xlAPP.InputBox("参照するフォルダ名を入力して下さい。", _
+                                 cnsTitle, "C:\")                       ' ①
+    'If VarType(vntPathName) = vbBoolean Then Exit Function
+    'strPathName = vntPathName
+    
+    
+    
+    ' フォルダの存在確認
+    If Dir(strPathName, vbDirectory) = "" Then                            ' ②vbDirectoryではフォルダを確認する
+        MsgBox "指定のフォルダは存在しません。", vbExclamation, cnsTitle
+        Exit Function
+    End If
+
+    ' 先頭のファイル名の取得
+    strFileName = Dir(strPathName & cnsDIR, vbNormal)                   ' ③
+    Do While strFileName <> ""
+        GYO = GYO + 1
+        strFileName = Dir()
+    Loop
+    ReDim strFileNames(GYO - 1)
+    
+    strFileNames(0) = Dir(strPathName & cnsDIR, vbNormal)
+    
+    
+    For i = 1 To GYO - 1
+        strFileNames(i) = Dir()
+    Next
+    displayDirectory = strFileNames()
+ 
+
+End Function
+
