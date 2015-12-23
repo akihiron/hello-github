@@ -1,2 +1,5 @@
+<<<<<<< HEAD
 I cant understand below memo 
+=======
+>>>>>>> 2ccb745... can i adding update vba
 http://excel-ubara.com/excelvba5/EXCEL119.html
