@@ -4,5 +4,9 @@ I cant understand below memo
 =======
 >>>>>>> 2ccb745... can i adding update vba
 =======
+<<<<<<< HEAD
 >>>>>>> 2ccb745... can i adding update vba
+=======
+>>>>>>> d76438ea17622e8acc61559b63198b6aa450d26c
+>>>>>>> f7cfa2d1a4801e2a51f38e883b4363e4b9096609
 http://excel-ubara.com/excelvba5/EXCEL119.html
