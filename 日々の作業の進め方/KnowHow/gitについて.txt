@@ -1,7 +1,35 @@
-git日本語化
 
 必要のないフォルダを管理下から外す方法
-echo <floder path> >> /.git/info/exclude
+echo <floder path>/ >> /.git/info/exclude
+必要のないファイルを管理下から外す方法
+echo <file path> >> /.git/info/exclude
 
-echo 'export LANG=ja_JP.UTF-8'>> /.bshrc
-echo '
+git日本語化
+echo 'export LANG=ja_JP.UTF-8'>> /.bashrc
+echo './.bashrc >> /.bash_profile
+git config --global core.quotepath false
+全て設定してコミット
+
+gitのGui操作
+git gui
+
+
+Gitのタグを表示
+git tag
+
+Gitにタグをつける
+git tag -a <tag名>　-m"massage"
+
+Gitのタグをリモートに挙げる
+git push --tags 
+
+
+
+gitのリモートブランチへのpushの仕方
+
+git push  0rigin <ローカルのブランチ名>:<リモートのブランチ名>
+
+
+
+
+
