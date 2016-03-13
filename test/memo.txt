@@ -6,7 +6,10 @@ I cant understand below memo
 =======
 <<<<<<< HEAD
 >>>>>>> 2ccb745... can i adding update vba
+<<<<<<< HEAD
 =======
 >>>>>>> d76438ea17622e8acc61559b63198b6aa450d26c
 >>>>>>> f7cfa2d1a4801e2a51f38e883b4363e4b9096609
+=======
+>>>>>>> 3ddafbd4aecf27caf608e7917bdb7fa9a6477ba5
 http://excel-ubara.com/excelvba5/EXCEL119.html
